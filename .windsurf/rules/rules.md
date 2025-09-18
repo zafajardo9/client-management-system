@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Engineering Rules & Conventions
 
 These rules guide implementation quality, performance, and organization.
@@ -13,7 +17,6 @@ These rules guide implementation quality, performance, and organization.
 ## Directory & Naming
 - `src/lib/actions/<domain>/<action>.ts` with `index.ts` exporting all domain actions.
 - `src/components/<page-or-shared>/*` with `index.ts`.
-- Shared UI primitives live under `src/components/shared/` with barrel exports (e.g., `DataTable`, `PageHeader`, `EmptyState`).
 - `src/app/api/<domain>/...` route handlers mirror actions.
 - Filenames: `camelCase` for actions and utilities, `PascalCase` for React components.
 
@@ -36,8 +39,6 @@ These rules guide implementation quality, performance, and organization.
 ## UI/UX
 - Use shadcn/ui and Tailwind; follow accessibility best practices.
 - Componentize forms and lists; keep components small and testable.
-- Use the standardized table wrapper `src/components/shared/DataTable.tsx` for all tabular data. Do not implement ad-hoc tables per page; extend the shared component if needed.
-- Toasts use Sonner via `@/components/ui/sonner` with a single `Toaster` mounted in `src/app/layout.tsx`.
 
 ## Testing & Quality
 - ESLint + Prettier enforced; CI must pass.

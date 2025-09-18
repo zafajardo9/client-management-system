@@ -1,6 +1,10 @@
+import Link from "next/link";
+
 export function UpdatesList({
+  projectId,
   items,
 }: {
+  projectId: string;
   items: Array<{ id: string; title: string; createdAt: Date; status: string; tags: string[] }>;
 }) {
   if (!items.length) {
@@ -11,7 +15,11 @@ export function UpdatesList({
       {items.map((u) => (
         <li key={u.id} className="p-4 space-y-1">
           <div className="flex items-center justify-between gap-4">
-            <div className="font-medium">{u.title}</div>
+            <div className="font-medium">
+              <Link href={`/projects/${projectId}/updates/${u.id}`} className="hover:underline">
+                {u.title}
+              </Link>
+            </div>
             <div className="text-xs text-muted-foreground">
               {new Date(u.createdAt).toLocaleString()} • {u.status}
             </div>

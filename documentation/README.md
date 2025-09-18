@@ -86,3 +86,22 @@ Notes
 - Every new API route and every page backed by server actions MUST include corresponding tests. See `documentation/Testing-Strategy.md`.
 
 See each document in `documentation/` and standards in `rules/` for details.
+
+## Current Status
+
+- Core pages implemented:
+  - `/dashboard` with create project form and project list
+  - `/projects/[projectId]` with project header, updates list, new update form, and share links section
+  - `/projects/[projectId]/updates/[updateId]` with update edit/delete form
+  - `/share/[slug]` public updates view
+- Loading skeletons added for all above routes.
+- Actions and API parity in place with tests under `src/tests/api/*`.
+
+## Next Steps
+
+- UI polish with shadcn/ui components (Button, Input, Textarea, Label, Select, Card, Badge, Separator, Skeleton, Dialog, AlertDialog, Toast/Toaster, Tooltip; optional: Table, DropdownMenu, Avatar, Form).
+- Add updates filters (status, tags) and pagination controls on `/projects/[projectId]` wired to API query params.
+- Add app header in `src/app/layout.tsx` with Clerk auth controls.
+- Collaboration UI for project members (add/remove, roles) and corresponding actions/API.
+
+See `documentation/Frontend-Structure.md` for the exact shadcn/ui components to generate and where they are used.

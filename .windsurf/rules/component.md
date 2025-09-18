@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Component Organization
 
 Organize by page and usage, with local barrels for ergonomic imports.
@@ -6,11 +10,6 @@ Organize by page and usage, with local barrels for ergonomic imports.
 - Keep components small, focused, and colocated with their page.
 - Promote shared atoms/molecules to `src/components/shared/`.
 - Prefer Server Components; use Client Components only for interactivity.
-
-Shared components (standardized across app):
-- `DataTable` for tabular data — `src/components/shared/DataTable.tsx`
-- `PageHeader` for page headings — `src/components/shared/PageHeader.tsx`
-- `EmptyState` for empty collections — `src/components/shared/EmptyState.tsx`
 
 ## Example
 ```
@@ -32,14 +31,6 @@ export { default as UpdatesList } from "./UpdatesList";
 export { default as NewUpdateDialog } from "./NewUpdateDialog";
 ```
 
-```ts
-// src/components/shared/index.ts
-export { DataTable } from "./DataTable";
-export { default as PageHeader } from "./PageHeader";
-export { default as EmptyState } from "./EmptyState";
-```
-
 ## Shadcn/ui Usage
 - Use primitives and compose variants with Tailwind.
 - Keep variant creation in the component file; document props with TS types.
-- Use Sonner for toasts via `@/components/ui/sonner` with a single `Toaster` in `src/app/layout.tsx`.

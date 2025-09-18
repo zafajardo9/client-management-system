@@ -77,7 +77,53 @@ src/
 - Forms: `react-hook-form` + `@hookform/resolvers/zod` for validation.
 - Prefer RSC for data fetching. Use Client Components only for interactive pieces.
 
+## Shared Atoms (created)
+- `src/components/shared/PageHeader.tsx` — page title/subtitle with optional actions.
+- `src/components/shared/EmptyState.tsx` — empty-state pattern.
+- Barrel: `src/components/shared/index.ts`.
+
 ## Data Fetching
 - Fetch primary data in the page (RSC) so the whole page loads complete.
 - Use `loading.tsx` for skeletons.
 - Use streaming for secondary sections below the fold as needed.
+
+## shadcn/ui Components to Generate (initial set)
+These are the primitives we will standardize on next. Please generate these with `shadcn/ui` and Tailwind classes.
+
+- Forms
+  - Button
+  - Input
+  - Textarea
+  - Label
+  - Select
+
+- Layout & Content
+  - Card
+  - Separator
+  - Skeleton
+  - Badge
+
+- Overlays & Feedback
+  - Dialog
+  - AlertDialog
+  - Toast (with Toaster and hook)
+  - Tooltip
+
+- Tables (optional in v1)
+  - Table
+
+Mapping to pages/components
+- Dashboard (`src/app/dashboard/page.tsx`)
+  - Card for project list container; Button/Input/Textarea/Label for CreateProjectForm.
+- Project page (`src/app/projects/[projectId]/page.tsx`)
+  - NewUpdateForm uses Button/Input/Textarea/Select/Label.
+  - Updates list uses Badge for tags; Skeleton for loading; later Card/Table if needed.
+  - ShareLinksSection uses Button/Input/Select/Label; AlertDialog for destructive revoke; Toast for feedback.
+- Update detail (`src/app/projects/[projectId]/updates/[updateId]/page.tsx`)
+  - UpdateForm uses Button/Input/Textarea/Select/Label; AlertDialog for delete.
+- Public share (`src/app/share/[slug]/page.tsx`)
+  - Badge for tags; Skeleton for loading.
+
+Notes
+- Keep components tree-shakeable; prefer server-rendered pages and small client footprints.
+- If Tailwind v4 is kept, ensure shadcn templates are compatible; otherwise prefer Tailwind v3.4.x for maximum compatibility.
