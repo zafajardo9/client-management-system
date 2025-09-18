@@ -38,7 +38,12 @@ These rules guide implementation quality, performance, and organization.
 
 ## Testing & Quality
 - ESLint + Prettier enforced; CI must pass.
-- Unit-test actions where feasible; e2e smoke tests on critical flows (optional initial).
+- Vitest is the testing framework.
+- Every new API route under `src/app/api/...` MUST include a corresponding test under `src/tests/api/...` mirroring the route path.
+- Every page backed by server actions MUST ensure those backends (actions/API) have tests.
+- Mock `@/lib/actions` for API route tests; mock `@/lib/db` and external SDKs for action tests.
+- Keep error shape consistent in tests: `{ error: { code, message, details? } }`.
+- e2e smoke tests for critical flows are optional initially.
 - Protect main branch; PRs require review.
 
 ## Security
