@@ -1,0 +1,101 @@
+// Prisma schema for Client Management System
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  clerkUserId  String   @unique
+  email        String   @unique
+  name         String?
+  imageUrl     String?
+  projects     Project[]        @relation("OwnerProjects")
+  memberships  ProjectMember[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Project {
+  id           String   @id @default(cuid())
+  ownerId      String
+  owner        User     @relation("OwnerProjects", fields: [ownerId], references: [id])
+  name         String
+  description  String?
+  isArchived   Boolean  @default(false)
+  members      ProjectMember[]
+  updates      Update[]
+  shareLinks   ShareLink[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([ownerId, createdAt])
+  @@index([isArchived])
+}
+
+model ProjectMember {
+  id        String  @id @default(cuid())
+  projectId String
+  userId    String
+  role      ProjectRole
+  project   Project @relation(fields: [projectId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, userId])
+  @@index([userId])
+}
+
+enum ProjectRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+model Update {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id])
+  title      String
+  bodyMd     String
+  status     UpdateStatus @default(PUBLISHED)
+  tags       String[]
+  createdBy  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([projectId, createdAt])
+  @@index([status])
+}
+
+enum UpdateStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model ShareLink {
+  id           String  @id @default(cuid())
+  projectId    String
+  project      Project @relation(fields: [projectId], references: [id])
+  slug         String  @unique
+  passwordHash String?
+  visibility   ShareVisibility @default(ALL)
+  tagFilter    String[]
+  enabled      Boolean @default(true)
+  createdAt    DateTime @default(now())
+  revokedAt    DateTime?
+
+  @@index([projectId])
+}
+
+enum ShareVisibility {
+  ALL
+  PUBLISHED_ONLY
+}

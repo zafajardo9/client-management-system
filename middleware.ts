@@ -1,0 +1,22 @@
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/share/(.*)",
+  "/api/share/(.*)",
+  "/favicon.ico",
+  "/_next/(.*)",
+  "/public/(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req)) return;
+  const { userId } = await auth();
+  if (!userId) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+});
+
+export const config = {
+  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api)(.*)"],
+};
