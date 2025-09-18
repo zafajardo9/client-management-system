@@ -1,19 +1,15 @@
-import { SignUp } from "@clerk/nextjs";
+import Link from "next/link";
+import { SignUpForm } from "../components/SignUpForm";
 
 export default function SignUpPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-16 md:py-24">
       <div className="mx-auto max-w-md">
-        <h1 className="text-2xl font-semibold mb-6">Create your account</h1>
-        <div className="rounded-lg border p-4">
-          <SignUp
-            path="/sign-up"
-            routing="path"
-            signInUrl="/sign-in"
-            afterSignUpUrl="/dashboard"
-            redirectUrl="/dashboard"
-          />
-        </div>
+        <SignUpForm />
+        <p className="mt-4 text-sm text-muted-foreground">
+          Already have an account? {" "}
+          <Link href="/sign-in" className="hover:underline">Sign in</Link>
+        </p>
       </div>
     </main>
   );

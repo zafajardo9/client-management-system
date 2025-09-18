@@ -4,6 +4,8 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/api-docs(.*)",
+  "/api/swagger",
   "/share/(.*)",
   "/api/share/(.*)",
   "/favicon.ico",

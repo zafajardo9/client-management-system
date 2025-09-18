@@ -4,6 +4,8 @@ import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { siteConfig } from "@/config/site";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -26,7 +28,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-semibold tracking-tight">
-            ClientMgmt
+            {siteConfig.name || "App"}
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             <SignedIn>
@@ -36,6 +38,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <SignedOut>
             <Button asChild variant="ghost" size="sm">
               <Link href="/sign-in">Log in</Link>

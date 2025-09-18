@@ -1,0 +1,40 @@
+/* Swagger UI customizations */
+.swagger-ui .topbar {
+  display: none !important;
+}
+
+.swagger-ui .info {
+  margin: 20px 0;
+}
+
+.swagger-ui .scheme-container {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.swagger-ui .info .title {
+  color: #1f2937;
+}
+
+.swagger-ui .info .description {
+  color: #6b7280;
+  margin: 10px 0;
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary {
+  border-color: #10b981;
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary {
+  border-color: #3b82f6;
+}
+
+.swagger-ui .opblock.opblock-patch .opblock-summary {
+  border-color: #f59e0b;
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary {
+  border-color: #ef4444;
+}
