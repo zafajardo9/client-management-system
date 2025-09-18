@@ -12,7 +12,7 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: "v8",
-      reports: ["text", "html", "lcov"],
+      reporter: ["text", "html", "lcov"],
     },
     include: [
       "src/tests/**/*.test.ts",

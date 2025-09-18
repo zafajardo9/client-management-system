@@ -1,6 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const updateShareLink = vi.fn(async (id: string, body: any) => ({ success: true, data: { id, ...body } }));
+interface ShareLinkUpdateData {
+  enabled?: boolean;
+  visibility?: string;
+  tagFilter?: string[];
+  passwordHash?: string;
+}
+
+interface RouteParams {
+  params: {
+    id: string;
+  };
+}
+
+const updateShareLink = vi.fn(async (id: string, body: ShareLinkUpdateData) => ({ success: true, data: { id, ...body } }));
 const deleteShareLink = vi.fn(async (id: string) => ({ success: true, data: { id } }));
 
 vi.mock("@/lib/actions", () => ({
@@ -21,7 +34,7 @@ describe("/api/share-links/:id route", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enabled: false }),
     });
-    const res = await PATCH(req as any, { params: { id: "sl1" } } as any);
+    const res = await PATCH(req, { params: { id: "sl1" } } as RouteParams);
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data?.id).toBe("sl1");
@@ -29,7 +42,7 @@ describe("/api/share-links/:id route", () => {
   });
 
   it("DELETE should revoke share link", async () => {
-    const res = await DELETE(new Request("http://localhost") as any, { params: { id: "sl1" } } as any);
+    const res = await DELETE(new Request("http://localhost"), { params: { id: "sl1" } } as RouteParams);
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.data?.id).toBe("sl1");

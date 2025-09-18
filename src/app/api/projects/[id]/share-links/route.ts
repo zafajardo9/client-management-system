@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
 import { shareLinks } from "@/lib/actions";
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  const result = await shareLinks.getShareLinks(params.id);
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const result = await shareLinks.getShareLinks(id);
   if (result.success) return NextResponse.json({ data: result.data });
   return NextResponse.json({ error: result.error }, { status: 400 });
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = await req.json();
-    const result = await shareLinks.createShareLink(params.id, body);
+    const { id } = await params;
+    const result = await shareLinks.createShareLink(id, body);
     if (result.success) return NextResponse.json({ data: result.data }, { status: 201 });
     return NextResponse.json({ error: result.error }, { status: 400 });
   } catch (err: unknown) {

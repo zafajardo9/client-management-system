@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
 import { updates } from "@/lib/actions";
 
-export async function GET(_req: Request, { params }: { params: { updateId: string } }) {
-  const result = await updates.getUpdateById(params.updateId);
+export async function GET(_req: Request, { params }: { params: Promise<{ updateId: string }> }) {
+  const { updateId } = await params;
+  const result = await updates.getUpdateById(updateId);
   if (result.success) return NextResponse.json({ data: result.data });
   return NextResponse.json({ error: result.error }, { status: 400 });
 }
 
-export async function PATCH(req: Request, { params }: { params: { updateId: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ updateId: string }> }) {
   try {
     const body = await req.json();
-    const result = await updates.updateUpdate({ updateId: params.updateId, ...body });
+    const { updateId } = await params;
+    const result = await updates.updateUpdate({ updateId, ...body });
     if (result.success) return NextResponse.json({ data: result.data });
     return NextResponse.json({ error: result.error }, { status: 400 });
   } catch (err: unknown) {
@@ -19,8 +21,9 @@ export async function PATCH(req: Request, { params }: { params: { updateId: stri
   }
 }
 
-export async function DELETE(_req: Request, { params }: { params: { updateId: string } }) {
-  const result = await updates.deleteUpdate(params.updateId);
+export async function DELETE(_req: Request, { params }: { params: Promise<{ updateId: string }> }) {
+  const { updateId } = await params;
+  const result = await updates.deleteUpdate(updateId);
   if (result.success) return NextResponse.json({ data: result.data });
   return NextResponse.json({ error: result.error }, { status: 400 });
 }

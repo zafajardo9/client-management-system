@@ -1,7 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+interface UpdateData {
+  title?: string;
+  bodyMd?: string;
+  tags?: string[];
+  status?: string;
+  projectId?: string;
+}
+
+interface RouteParams {
+  params: {
+    id: string;
+  };
+}
+
 const getUpdates = vi.fn(async () => ({ success: true, data: { items: [], page: 1, pageSize: 20, total: 0 } }));
-const createUpdate = vi.fn(async (body: any) => ({ success: true, data: { id: "u1", ...body } }));
+const createUpdate = vi.fn(async (body: UpdateData) => ({ success: true, data: { id: "u1", ...body } }));
 
 vi.mock("@/lib/actions", () => ({
   updates: {
@@ -17,7 +31,7 @@ describe("/api/projects/:id/updates route", () => {
 
   it("GET should list updates with filters", async () => {
     const req = new Request("http://localhost/api/projects/p1/updates?status=PUBLISHED&tag=a&tag=b&page=2&pageSize=5");
-    const res = await GET(req as any, { params: { id: "p1" } } as any);
+    const res = await GET(req, { params: { id: "p1" } } as RouteParams);
     expect(res.status).toBe(200);
     expect(getUpdates).toHaveBeenCalledWith("p1", expect.objectContaining({ status: "PUBLISHED" }));
   });
@@ -28,7 +42,7 @@ describe("/api/projects/:id/updates route", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: "v1", bodyMd: "Init", tags: ["release"], status: "PUBLISHED" }),
     });
-    const res = await POST(req as any, { params: { id: "p1" } } as any);
+    const res = await POST(req, { params: { id: "p1" } } as RouteParams);
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.data?.projectId).toBe("p1");

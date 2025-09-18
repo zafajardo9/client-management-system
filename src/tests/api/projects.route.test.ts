@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+interface ProjectData {
+  name?: string;
+  description?: string;
+  isArchived?: boolean;
+}
+
 vi.mock("@/lib/actions", () => ({
   projects: {
     getProjects: vi.fn(async () => ({ success: true, data: [{ id: "p1", name: "Demo", description: null, isArchived: false }] })),
-    createProject: vi.fn(async (body: any) => ({ success: true, data: { id: "p2", ...body } })),
+    createProject: vi.fn(async (body: ProjectData) => ({ success: true, data: { id: "p2", ...body } })),
   },
 }));
 
@@ -28,7 +34,7 @@ describe("/api/projects route", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "New Project", description: "Test" }),
     });
-    const res = await postProject(req as any);
+    const res = await postProject(req);
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.data?.id).toBeDefined();

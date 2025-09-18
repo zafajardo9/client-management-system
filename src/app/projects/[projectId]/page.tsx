@@ -1,11 +1,12 @@
-import { projects, updates, shareLinks } from "@/lib/actions";
-import { NewUpdateForm, UpdatesList, ShareLinksSection } from "./components";
+import { projects, updates, shareLinks, members } from "@/lib/actions";
+import { NewUpdateForm, UpdatesList, ShareLinksSection, MembersSection } from "./components";
 
 export default async function ProjectPage({ params }: { params: { projectId: string } }) {
-  const [projectRes, updatesRes, linksRes] = await Promise.all([
+  const [projectRes, updatesRes, linksRes, membersRes] = await Promise.all([
     projects.getProjectById(params.projectId),
     updates.getUpdates(params.projectId, { page: 1, pageSize: 50 }),
     shareLinks.getShareLinks(params.projectId),
+    members.getMembers(params.projectId),
   ]);
 
   if (!projectRes.success) {
@@ -19,6 +20,7 @@ export default async function ProjectPage({ params }: { params: { projectId: str
   const project = projectRes.data;
   const items = updatesRes.success ? updatesRes.data.items : [];
   const links = linksRes.success ? linksRes.data : [];
+  const memberList = membersRes.success ? membersRes.data : [];
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10 space-y-8">
@@ -42,6 +44,11 @@ export default async function ProjectPage({ params }: { params: { projectId: str
       <section className="space-y-3">
         <h2 className="font-medium">Share Links</h2>
         <ShareLinksSection projectId={project.id} links={links} />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-medium">Collaborators</h2>
+        <MembersSection members={memberList} />
       </section>
     </main>
   );

@@ -1,7 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+interface ShareLinkData {
+  slug?: string;
+  visibility?: string;
+  tagFilter?: string[];
+  enabled?: boolean;
+  passwordHash?: string;
+}
+
+interface RouteParams {
+  params: {
+    id: string;
+  };
+}
+
 const getShareLinks = vi.fn(async (projectId: string) => ({ success: true, data: [{ id: "sl1", projectId, slug: "demo" }] }));
-const createShareLink = vi.fn(async (projectId: string, body: any) => ({ success: true, data: { id: "sl2", projectId, ...body } }));
+const createShareLink = vi.fn(async (projectId: string, body: ShareLinkData) => ({ success: true, data: { id: "sl2", projectId, ...body } }));
 
 vi.mock("@/lib/actions", () => ({
   shareLinks: {
@@ -16,7 +30,7 @@ describe("/api/projects/:id/share-links route", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("GET should list share links", async () => {
-    const res = await GET(new Request("http://localhost") as any, { params: { id: "p1" } } as any);
+    const res = await GET(new Request("http://localhost"), { params: { id: "p1" } } as RouteParams);
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(Array.isArray(json.data)).toBe(true);
@@ -29,7 +43,7 @@ describe("/api/projects/:id/share-links route", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ slug: "public", visibility: "PUBLISHED_ONLY", tagFilter: ["release"] }),
     });
-    const res = await POST(req as any, { params: { id: "p1" } } as any);
+    const res = await POST(req, { params: { id: "p1" } } as RouteParams);
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.data?.projectId).toBe("p1");
