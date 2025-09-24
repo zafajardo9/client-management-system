@@ -1,5 +1,10 @@
 import { projects, updates, shareLinks, members } from "@/lib/actions";
-import { NewUpdateForm, UpdatesList, ShareLinksSection, MembersSection } from "./components";
+import {
+  NewUpdateForm,
+  UpdatesList,
+  ShareLinksSection,
+  MembersSection,
+} from "@/components/pages/projects";
 
 export default async function ProjectPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;

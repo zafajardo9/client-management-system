@@ -12,7 +12,7 @@ export function ThemeToggle() {
   useEffect(() => setMounted(true), []);
 
   const isDark = (resolvedTheme ?? theme) === "dark";
-  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
+  const label = mounted ? (isDark ? "Switch to light mode" : "Switch to dark mode") : "Toggle theme";
 
   return (
     <TooltipProvider>
@@ -24,14 +24,14 @@ export function ThemeToggle() {
             aria-label={label}
             onClick={() => setTheme(isDark ? "light" : "dark")}
           >
-            {mounted && isDark ? (
-              <Sun className="h-4 w-4" />
+            {mounted ? (
+              isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />
             ) : (
               <Moon className="h-4 w-4" />
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{label}</TooltipContent>
+        {mounted ? <TooltipContent>{label}</TooltipContent> : null}
       </Tooltip>
     </TooltipProvider>
   );
