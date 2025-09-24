@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "../../db";
 import type { ActionResult } from "../types";
+import { ensureUser } from "../../auth/ensureUser";
 
 export async function getProjects(): Promise<
   ActionResult<
@@ -16,7 +17,7 @@ export async function getProjects(): Promise<
       };
     }
 
-    const user = await db.user.findUnique({ where: { clerkUserId: userId } });
+    const user = await ensureUser();
     if (!user) {
       return {
         success: false,

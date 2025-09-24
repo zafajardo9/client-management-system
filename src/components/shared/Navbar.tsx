@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { siteConfig } from "@/config/site";
+import { appNavItems } from "@/lib/constants/navItems";
+import UserMenu from "@/components/shared/UserMenu";
+import { cn } from "@/lib/utils";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -13,9 +17,10 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className={`text-sm px-2 py-1 rounded-md transition-colors ${
-        active ? "bg-neutral-100 text-foreground" : "text-muted-foreground hover:text-foreground"
-      }`}
+      className={cn(
+        "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        active ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+      )}
     >
       {children}
     </Link>
@@ -30,11 +35,15 @@ export default function Navbar() {
           <Link href="/" className="font-semibold tracking-tight">
             {siteConfig.name || "App"}
           </Link>
-          <nav className="hidden md:flex items-center gap-1">
-            <SignedIn>
-              <NavLink href="/dashboard">Dashboard</NavLink>
-            </SignedIn>
-          </nav>
+          <SignedIn>
+            <nav className="hidden md:flex items-center gap-1">
+              {appNavItems.map((item) => (
+                <NavLink key={item.href} href={item.href}>
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+          </SignedIn>
         </div>
 
         <div className="flex items-center gap-2">
@@ -49,12 +58,7 @@ export default function Navbar() {
           </SignedOut>
 
           <SignedIn>
-            <UserButton
-              appearance={{
-                elements: { userButtonPopoverCard: "shadow-md" },
-              }}
-              afterSignOutUrl="/"
-            />
+            <UserMenu />
           </SignedIn>
         </div>
       </div>

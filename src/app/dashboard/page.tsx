@@ -1,46 +1,45 @@
-import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader, ProjectCreateCard, ProjectList, ProjectRowActions } from "@/components/shared";
+import { DashboardAnalytics } from "@/components/pages/dashboard";
 import { projects } from "@/lib/actions";
-import { CreateProjectForm } from "./components";
 
 export default async function DashboardPage() {
   const result = await projects.getProjects();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10 space-y-8">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Manage your projects and updates.</p>
-      </header>
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10">
+      <PageHeader
+        title="Dashboard"
+        subtitle="Create new projects, review existing work, and stay aligned with your team."
+      />
 
-      <section className="rounded-md border p-4">
-        <h2 className="font-medium mb-3">Create Project</h2>
-        {/* Client component posting to /api/projects */}
-        <CreateProjectForm />
-      </section>
+      <DashboardAnalytics />
 
-      <section className="space-y-3">
-        <h2 className="font-medium">Your Projects</h2>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <ProjectCreateCard />
+
         {result.success ? (
-          <ul className="divide-y rounded-md border">
-            {result.data.length === 0 && (
-              <li className="p-4 text-sm text-muted-foreground">No projects yet. Create one above.</li>
+          <ProjectList
+            projects={result.data}
+            title="Your projects"
+            description="Browse every project you own or collaborate on."
+            emptyTitle="You haven't created any projects yet"
+            emptyDescription="Launch your first project to begin sharing updates with your stakeholders."
+            renderActions={(project) => (
+              <ProjectRowActions projectId={project.id} isArchived={project.isArchived} />
             )}
-            {result.data.map((p) => (
-              <li key={p.id} className="p-4 flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{p.name}</div>
-                  {p.description && <div className="text-sm text-muted-foreground">{p.description}</div>}
-                </div>
-                <Link href={`/projects/${p.id}`} className="text-primary hover:underline">
-                  Open →
-                </Link>
-              </li>
-            ))}
-          </ul>
+          />
         ) : (
-          <div className="text-sm text-red-600">{result.error.message}</div>
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-base">Unable to load projects</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-destructive">{result.error.message}</p>
+            </CardContent>
+          </Card>
         )}
-      </section>
+      </div>
     </main>
   );
 }

@@ -34,3 +34,6 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqd3RfaWQiOjEsInNlY3VyZV9rZXkiOiJza19tOVYzckRYNXlMbk1SMllvUU9jdm4iLCJhcGlfa2V5IjoiMDFLNVdZSlZGMk43WURBRENKQU1BTlM1WkUiLCJ0ZW5hbnRfaWQiOiI4YTg5YzNiOTc1YTg0YmMwNTExMjJhZDg2YzM2MjU0MjIzMTZhYzk0Mjg1ZDY2NjMzOWQ5ZTM4Y2IxMTUwNmVkIiwiaW50ZXJuYWxfc2VjcmV0IjoiMDVlZWQ5MzgtNTA0Ni00OTc4LWEzYzktY2I1M2NkNjY4OTA4In0.fLhhrMIU-gX7RPq-WG4n41aJCXaKipWBsYCuSUatC2E"

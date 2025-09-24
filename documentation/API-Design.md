@@ -16,6 +16,9 @@ APIs live under `src/app/api/*`. Each handler imports the corresponding server a
   - `POST /api/projects` — create project
   - `GET /api/projects/:id` — get project details
   - `PATCH /api/projects/:id` — update project
+  - `DELETE /api/projects/:id` — archive project
+  - `POST /api/projects/:id/delete` — permanently delete a project and related data
+  - `POST /api/projects/:id/transfer-ownership` — transfer project ownership to an existing collaborator
 
 - Updates
   - `GET /api/projects/:id/updates` — list updates (filters: status, tags, page)
@@ -23,6 +26,12 @@ APIs live under `src/app/api/*`. Each handler imports the corresponding server a
   - `GET /api/updates/:updateId` — get single update
   - `PATCH /api/updates/:updateId` — edit update
   - `DELETE /api/updates/:updateId` — delete update
+
+- Members
+  - `GET /api/projects/:id/members` — list members for a project
+  - `POST /api/projects/:id/members` — add member
+  - `PATCH /api/projects/:id/members/:userId` — update collaborator role (EDITOR/VIEWER)
+  - `DELETE /api/projects/:id/members/:userId` — remove member
 
 - Share Links
   - `POST /api/projects/:id/share-links` — create share link

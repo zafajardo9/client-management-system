@@ -387,6 +387,66 @@ export const swaggerSpec = {
           }
         }
       },
+      '/api/projects/{id}/transfer-ownership': {
+        post: {
+          summary: 'Transfer project ownership',
+          description: 'Transfer ownership of a project to another collaborator',
+          tags: ['Projects'],
+          security: [{ ClerkAuth: [] }],
+          parameters: [
+            {
+              in: 'path',
+              name: 'id',
+              required: true,
+              schema: { type: 'string' },
+              description: 'Project ID'
+            }
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    targetUserId: { type: 'string' }
+                  },
+                  required: ['targetUserId']
+                }
+              }
+            }
+          },
+          responses: {
+            200: {
+              description: 'Ownership transferred successfully',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      data: {
+                        type: 'object',
+                        properties: {
+                          projectId: { type: 'string' },
+                          ownerId: { type: 'string' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            400: {
+              description: 'Bad request',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Error' }
+                }
+              }
+            }
+          }
+        }
+      },
       '/api/projects/{id}': {
         get: {
           summary: 'Get project by ID',

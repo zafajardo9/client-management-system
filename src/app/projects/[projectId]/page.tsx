@@ -1,12 +1,14 @@
 import { projects, updates, shareLinks, members } from "@/lib/actions";
 import { NewUpdateForm, UpdatesList, ShareLinksSection, MembersSection } from "./components";
 
-export default async function ProjectPage({ params }: { params: { projectId: string } }) {
+export default async function ProjectPage({ params }: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
+
   const [projectRes, updatesRes, linksRes, membersRes] = await Promise.all([
-    projects.getProjectById(params.projectId),
-    updates.getUpdates(params.projectId, { page: 1, pageSize: 50 }),
-    shareLinks.getShareLinks(params.projectId),
-    members.getMembers(params.projectId),
+    projects.getProjectById(projectId),
+    updates.getUpdates(projectId, { page: 1, pageSize: 50 }),
+    shareLinks.getShareLinks(projectId),
+    members.getMembers(projectId),
   ]);
 
   if (!projectRes.success) {
