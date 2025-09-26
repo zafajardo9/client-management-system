@@ -1,8 +1,7 @@
 import type { ActionResult } from "../types";
 import { db } from "../../db";
-import { generateShareToken } from "./utils";
 
-export async function createShareLink(
+export async function getShareLink(
   projectId: string
 ): Promise<
   ActionResult<{
@@ -12,24 +11,14 @@ export async function createShareLink(
     enabled: boolean;
     createdAt: Date;
     updatedAt: Date;
-  }>
+  } | null>
 > {
   try {
-    const token = generateShareToken();
-    const link = (await db.shareLink.upsert({
+    const link = await db.shareLink.findFirst({
       where: { projectId },
-      update: { token, enabled: true },
-      create: { projectId, token, enabled: true },
       select: { id: true, projectId: true, token: true, enabled: true, createdAt: true, updatedAt: true },
-    })) as {
-      id: string;
-      projectId: string;
-      token: string;
-      enabled: boolean;
-      createdAt: Date;
-      updatedAt: Date;
-    };
-    return { success: true, data: link };
+    });
+    return { success: true, data: link ?? null };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return { success: false, error: { code: "INTERNAL", message } };

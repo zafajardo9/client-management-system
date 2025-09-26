@@ -31,7 +31,7 @@ model Project {
   isArchived   Boolean  @default(false)
   members      ProjectMember[]
   updates      Update[]
-  shareLinks   ShareLink[]
+  shareLink    ShareLink?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -81,21 +81,11 @@ enum UpdateStatus {
 }
 
 model ShareLink {
-  id           String  @id @default(cuid())
-  projectId    String
-  project      Project @relation(fields: [projectId], references: [id])
-  slug         String  @unique
-  passwordHash String?
-  visibility   ShareVisibility @default(ALL)
-  tagFilter    String[]
-  enabled      Boolean @default(true)
-  createdAt    DateTime @default(now())
-  revokedAt    DateTime?
-
-  @@index([projectId])
-}
-
-enum ShareVisibility {
-  ALL
-  PUBLISHED_ONLY
+  id        String   @id @default(cuid())
+  projectId String   @unique
+  project   Project  @relation(fields: [projectId], references: [id])
+  token     String   @unique
+  enabled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

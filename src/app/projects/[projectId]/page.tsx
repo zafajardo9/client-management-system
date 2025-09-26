@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from "react";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
 import { AppPageLayout } from "@/components/shared";
 import { projects } from "@/lib/actions";
@@ -50,6 +50,10 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const projectRes = await projects.getProjectById(projectId);
 
   if (!projectRes.success) {
+    if (projectRes.error.code === "NOT_FOUND") {
+      notFound();
+    }
+
     return (
       <AppPageLayout
         title="Project"

@@ -3,19 +3,19 @@ import { shareLinks } from "@/lib/actions";
 
 /**
  * @swagger
- * /api/share/{slug}:
+ * /api/share/{token}:
  *   get:
- *     summary: Get public updates by share link
- *     description: Retrieve public updates for a project using a share link slug (no authentication required)
+ *     summary: Get public updates by share token
+ *     description: Retrieve public updates for a project using a share link token (no authentication required)
  *     tags:
  *       - Public Share
  *     parameters:
  *       - in: path
- *         name: slug
+ *         name: token
  *         required: true
  *         schema:
  *           type: string
- *         description: Share link slug
+ *         description: Share link token
  *     responses:
  *       200:
  *         description: Public updates and share link info
@@ -29,6 +29,8 @@ import { shareLinks } from "@/lib/actions";
  *                   properties:
  *                     link:
  *                       $ref: '#/components/schemas/ShareLink'
+ *                     project:
+ *                       $ref: '#/components/schemas/Project'
  *                     items:
  *                       type: array
  *                       items:
@@ -46,9 +48,9 @@ import { shareLinks } from "@/lib/actions";
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const result = await shareLinks.getPublicUpdatesBySlug(slug);
+export async function GET(_req: Request, { params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  const result = await shareLinks.getPublicUpdatesByToken(token);
   if (result.success) return NextResponse.json({ data: result.data });
   return NextResponse.json({ error: result.error }, { status: 404 });
 }

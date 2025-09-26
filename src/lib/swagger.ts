@@ -184,68 +184,23 @@ export const swaggerSpec = {
               type: 'string',
               example: 'clr123abc456',
             },
-            slug: {
+            token: {
               type: 'string',
-              example: 'website-redesign-updates',
-            },
-            visibility: {
-              type: 'string',
-              enum: ['ALL', 'PUBLISHED_ONLY'],
-              example: 'PUBLISHED_ONLY',
-            },
-            tagFilter: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-              example: ['release'],
+              example: '12d9c7f8a6b44a5c9c1e8f3d9b2a6c1d',
             },
             enabled: {
               type: 'boolean',
               example: true,
-            },
-            passwordHash: {
-              type: 'string',
-              nullable: true,
-              example: null,
             },
             createdAt: {
               type: 'string',
               format: 'date-time',
               example: '2024-01-15T10:30:00Z',
             },
-            revokedAt: {
+            updatedAt: {
               type: 'string',
               format: 'date-time',
-              nullable: true,
-              example: null,
-            },
-          },
-        },
-        ShareLinkCreate: {
-          type: 'object',
-          required: ['slug'],
-          properties: {
-            slug: {
-              type: 'string',
-              example: 'my-project-updates',
-            },
-            visibility: {
-              type: 'string',
-              enum: ['ALL', 'PUBLISHED_ONLY'],
-              example: 'PUBLISHED_ONLY',
-            },
-            tagFilter: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-              example: ['release'],
-            },
-            passwordHash: {
-              type: 'string',
-              nullable: true,
-              example: null,
+              example: '2024-01-20T09:18:42Z',
             },
           },
         },
@@ -582,19 +537,21 @@ export const swaggerSpec = {
           }
         }
       },
-      '/api/share/{slug}': {
+      '/api/share/{token}': {
         get: {
-          summary: 'Get public updates by share link',
-          description: 'Retrieve public updates for a project using a share link slug (no authentication required)',
+          summary: 'Get public updates by share token',
+          description: 'Retrieve public updates for a project using a share link token (no authentication required)',
           tags: ['Public Share'],
           parameters: [
             {
               in: 'path',
-              name: 'slug',
+              name: 'token',
               required: true,
-              schema: { type: 'string' },
-              description: 'Share link slug'
-            }
+              schema: {
+                type: 'string',
+              },
+              description: 'Share link token',
+            },
           ],
           responses: {
             200: {
@@ -608,12 +565,13 @@ export const swaggerSpec = {
                         type: 'object',
                         properties: {
                           link: { $ref: '#/components/schemas/ShareLink' },
+                          project: { $ref: '#/components/schemas/Project' },
                           items: {
                             type: 'array',
-                            items: { $ref: '#/components/schemas/Update' }
-                          }
-                        }
-                      }
+                            items: { $ref: '#/components/schemas/Update' },
+                          },
+                        },
+                      },
                     }
                   }
                 }

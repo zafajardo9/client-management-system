@@ -1,202 +1,217 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RefreshCw, Copy, Link as LinkIcon } from "lucide-react";
 
-interface ShareLinkItem {
+interface ShareLinkClientShape {
   id: string;
-  slug: string;
+  projectId: string;
+  token: string;
   enabled: boolean;
-  createdAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface ShareLinksSectionProps {
   projectId: string;
-  links: ShareLinkItem[];
+  initialLink: ShareLinkClientShape | null;
 }
 
-export default function ShareLinksSection({ projectId, links }: ShareLinksSectionProps) {
-  const [items, setItems] = useState<ShareLinkItem[]>(links);
-  const [slug, setSlug] = useState("");
-  const [visibility, setVisibility] = useState<"ALL" | "PUBLISHED_ONLY">("ALL");
-  const [tags, setTags] = useState("");
-  const [loading, setLoading] = useState(false);
+function normalizeLink(data: Record<string, unknown>): ShareLinkClientShape {
+  return {
+    id: String(data.id ?? ""),
+    projectId: String(data.projectId ?? ""),
+    token: String(data.token ?? ""),
+    enabled: Boolean(data.enabled),
+    createdAt: String(data.createdAt ?? new Date().toISOString()),
+    updatedAt: String(data.updatedAt ?? new Date().toISOString()),
+  };
+}
 
-  async function onCreate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
+export default function ShareLinksSection({ projectId, initialLink }: ShareLinksSectionProps) {
+  const [link, setLink] = useState<ShareLinkClientShape | null>(initialLink);
+  const [origin, setOrigin] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const shareUrl = useMemo(() => {
+    if (!link) return null;
+    return origin ? `${origin}/share/${link.token}` : `/share/${link.token}`;
+  }, [link, origin]);
+
+  const formattedUpdatedAt = useMemo(() => {
+    if (!link) return null;
+    const date = new Date(link.updatedAt ?? link.createdAt);
+    return date.toLocaleString();
+  }, [link]);
+
+  async function handleCreate() {
+    setIsCreating(true);
     try {
-      const payload = {
-        slug,
-        visibility,
-        tagFilter: tags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-      };
-
-      const response = await fetch(`/api/projects/${projectId}/share-links`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(`/api/projects/${projectId}/share-links`, { method: "POST" });
       const json = await response.json();
       if (!response.ok) {
-        throw new Error(json?.error?.message ?? "Failed to create link");
+        throw new Error(json?.error?.message ?? "Unable to create share link");
       }
-
-      setItems((prev) => [
-        {
-          id: json.data?.id ?? crypto.randomUUID(),
-          slug,
-          enabled: true,
-          createdAt: new Date(),
-        },
-        ...prev,
-      ]);
-
-      toast.success("Share link created");
-      setSlug("");
-      setTags("");
-      setVisibility("ALL");
+      const created = normalizeLink(json.data ?? {});
+      setLink(created);
+      toast.success("Sharing enabled");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       toast.error(message);
     } finally {
-      setLoading(false);
+      setIsCreating(false);
     }
   }
 
-  async function toggleEnabled(id: string, enabled: boolean) {
+  async function handleToggle() {
+    if (!link) return;
+    setIsToggling(true);
     try {
-      const response = await fetch(`/api/share-links/${id}`, {
+      const response = await fetch(`/api/share-links/${link.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled }),
+        body: JSON.stringify({ enabled: !link.enabled }),
       });
       const json = await response.json();
       if (!response.ok) {
-        throw new Error(json?.error?.message ?? "Failed to update link");
+        throw new Error(json?.error?.message ?? "Unable to update share link");
       }
-
-      setItems((prev) => prev.map((link) => (link.id === id ? { ...link, enabled } : link)));
-      toast.success(enabled ? "Link enabled" : "Link disabled");
+      const updated = normalizeLink(json.data ?? {});
+      setLink(updated);
+      toast.success(updated.enabled ? "Sharing enabled" : "Sharing disabled");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       toast.error(message);
+    } finally {
+      setIsToggling(false);
     }
   }
 
-  async function revoke(id: string) {
+  async function handleRegenerate() {
+    if (!link) return;
+    setIsRegenerating(true);
     try {
-      const response = await fetch(`/api/share-links/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/share-links/${link.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ regenerateToken: true }),
+      });
       const json = await response.json();
       if (!response.ok) {
-        throw new Error(json?.error?.message ?? "Failed to revoke link");
+        throw new Error(json?.error?.message ?? "Unable to regenerate link");
       }
-
-      setItems((prev) => prev.filter((link) => link.id !== id));
-      toast.success("Link revoked");
+      const updated = normalizeLink(json.data ?? {});
+      setLink(updated);
+      toast.success("New share link generated");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
+      toast.error(message);
+    } finally {
+      setIsRegenerating(false);
+    }
+  }
+
+  async function handleCopy() {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied to clipboard");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to copy link";
       toast.error(message);
     }
   }
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={onCreate} className="space-y-3 rounded-md border p-4">
-        <div className="font-medium">Create Share Link</div>
-        <div className="grid gap-1">
-          <label className="text-sm font-medium">Slug</label>
-          <input
-            className="rounded border px-3 py-2"
-            placeholder="unique-slug"
-            value={slug}
-            onChange={(event) => setSlug(event.target.value)}
-            required
-          />
-        </div>
-        <div className="grid gap-1">
-          <label className="text-sm font-medium">Visibility</label>
-          <select
-            className="rounded border px-3 py-2"
-            value={visibility}
-            onChange={(event) => setVisibility(event.target.value as "ALL" | "PUBLISHED_ONLY")}
-          >
-            <option value="ALL">ALL</option>
-            <option value="PUBLISHED_ONLY">PUBLISHED_ONLY</option>
-          </select>
-        </div>
-        <div className="grid gap-1">
-          <label className="text-sm font-medium">Tag Filter (comma separated)</label>
-          <input
-            className="rounded border px-3 py-2"
-            placeholder="e.g. release, ui"
-            value={tags}
-            onChange={(event) => setTags(event.target.value)}
-          />
-        </div>
-        <button
-          type="submit"
-          className="inline-flex items-center rounded bg-black px-4 py-2 text-white disabled:opacity-50"
-          disabled={loading}
-        >
-          {loading ? "Creating..." : "Create Link"}
-        </button>
-      </form>
-
-      <div className="space-y-2">
-        <div className="font-medium">Existing Links</div>
-        {items.length === 0 ? (
-          <div className="text-sm text-muted-foreground">No share links yet.</div>
-        ) : (
-          <ul className="divide-y rounded-md border">
-            {items.map((link) => (
-              <li key={link.id} className="space-y-2 px-4 py-3">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="font-medium">{link.slug}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(link.createdAt).toLocaleString()}
-                    </div>
-                    <div className="text-xs">
-                      URL: {" "}
-                      <a className="text-primary hover:underline" href={`/share/${link.slug}`} target="_blank">
-                        /share/{link.slug}
-                      </a>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => navigator.clipboard.writeText(`${window.location.origin}/share/${link.slug}`)}
-                      className="rounded border px-3 py-1 text-sm"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleEnabled(link.id, !link.enabled)}
-                      className="rounded border px-3 py-1 text-sm"
-                    >
-                      {link.enabled ? "Disable" : "Enable"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => revoke(link.id)}
-                      className="rounded border border-destructive px-3 py-1 text-sm text-destructive"
-                    >
-                      Revoke
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+    <div className="space-y-6">
+      {!link ? (
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle>Share this project</CardTitle>
+            <CardDescription>
+              Generate a secure share link to let clients or stakeholders follow published updates.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button onClick={handleCreate} disabled={isCreating} className="gap-2">
+              <LinkIcon className="h-4 w-4" />
+              {isCreating ? "Creating..." : "Enable sharing"}
+            </Button>
+          </CardFooter>
+        </Card>
+      ) : (
+        <Card className="shadow-sm">
+          <CardHeader className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <CardTitle className="text-xl font-semibold">Share link</CardTitle>
+              <Badge variant={link.enabled ? "default" : "secondary"} className="uppercase">
+                {link.enabled ? "Active" : "Disabled"}
+              </Badge>
+            </div>
+            <CardDescription>
+              Share this URL with viewers who should see your published updates. Disable or refresh it anytime.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="share-url">Public URL</Label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  id="share-url"
+                  value={shareUrl ?? ""}
+                  readOnly
+                  className="sm:flex-1"
+                />
+                <Button variant="secondary" onClick={handleCopy} className="gap-2" disabled={!shareUrl}>
+                  <Copy className="h-4 w-4" /> Copy
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Link last updated {formattedUpdatedAt ?? "just now"}
+              </p>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={link.enabled ? "outline" : "default"}
+                onClick={handleToggle}
+                disabled={isToggling || isRegenerating}
+              >
+                {isToggling ? "Saving..." : link.enabled ? "Disable sharing" : "Enable sharing"}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleRegenerate}
+                disabled={isRegenerating || isToggling}
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {isRegenerating ? "Regenerating..." : "Regenerate link"}
+              </Button>
+            </div>
+            {!link.enabled ? (
+              <p className="text-xs text-muted-foreground">
+                Sharing is currently disabled. Enable it to make the link accessible again.
+              </p>
+            ) : null}
+          </CardFooter>
+        </Card>
+      )}
     </div>
   );
 }

@@ -7,15 +7,23 @@ interface ProjectShareLinksSectionProps {
 }
 
 export default async function ProjectShareLinksSection({ projectId }: ProjectShareLinksSectionProps) {
-  const linksRes = await shareLinks.getShareLinks(projectId);
+  const linkRes = await shareLinks.getShareLink(projectId);
 
-  if (!linksRes.success) {
+  if (!linkRes.success) {
     return (
       <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-        {linksRes.error.message}
+        {linkRes.error.message}
       </div>
     );
   }
 
-  return <ShareLinksSection projectId={projectId} links={linksRes.data} />;
+  const link = linkRes.data
+    ? {
+        ...linkRes.data,
+        createdAt: linkRes.data.createdAt.toISOString(),
+        updatedAt: linkRes.data.updatedAt.toISOString(),
+      }
+    : null;
+
+  return <ShareLinksSection projectId={projectId} initialLink={link} />;
 }

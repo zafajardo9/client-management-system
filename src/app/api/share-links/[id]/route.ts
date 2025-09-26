@@ -27,16 +27,10 @@ import { shareLinks } from "@/lib/actions";
  *             properties:
  *               enabled:
  *                 type: boolean
- *               visibility:
- *                 type: string
- *                 enum: [ALL, PUBLISHED_ONLY]
- *               tagFilter:
- *                 type: array
- *                 items:
- *                   type: string
- *               passwordHash:
- *                 type: string
- *                 nullable: true
+ *                 description: Toggle whether the share link is active
+ *               regenerateToken:
+ *                 type: boolean
+ *                 description: Issue a new share token (also enables the link)
  *     responses:
  *       200:
  *         description: Share link updated successfully
@@ -55,10 +49,33 @@ import { shareLinks } from "@/lib/actions";
  *               $ref: '#/components/schemas/Error'
  */
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   try {
-    const body = await req.json();
-    const { id } = await params;
-    const result = await shareLinks.updateShareLink(id, body);
+    const body = (await req.json()) as { enabled?: unknown; regenerateToken?: unknown };
+
+    const payload: { enabled?: boolean; regenerateToken?: boolean } = {};
+    if (body.enabled !== undefined) {
+      if (typeof body.enabled !== "boolean") {
+        return NextResponse.json(
+          { error: { code: "BAD_REQUEST", message: "`enabled` must be a boolean." } },
+          { status: 400 }
+        );
+      }
+      payload.enabled = body.enabled;
+    }
+
+    if (body.regenerateToken !== undefined) {
+      if (typeof body.regenerateToken !== "boolean") {
+        return NextResponse.json(
+          { error: { code: "BAD_REQUEST", message: "`regenerateToken` must be a boolean." } },
+          { status: 400 }
+        );
+      }
+      payload.regenerateToken = body.regenerateToken;
+    }
+
+    const result = await shareLinks.updateShareLink(id, payload);
     if (result.success) return NextResponse.json({ data: result.data });
     return NextResponse.json({ error: result.error }, { status: 400 });
   } catch (err: unknown) {
