@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { MarkdownEditor, TagInput } from "@/components/shared";
 
 interface NewUpdateFormProps {
   projectId: string;
@@ -20,7 +20,7 @@ export default function NewUpdateForm({ projectId, className }: NewUpdateFormPro
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [bodyMd, setBodyMd] = useState("");
-  const [tags, setTags] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED" | "ARCHIVED">("PUBLISHED");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +31,10 @@ export default function NewUpdateForm({ projectId, className }: NewUpdateFormPro
     setError(null);
 
     try {
+      if (!bodyMd.trim()) {
+        throw new Error("Body cannot be empty.");
+      }
+
       const response = await fetch(`/api/projects/${projectId}/updates`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,10 +42,7 @@ export default function NewUpdateForm({ projectId, className }: NewUpdateFormPro
           projectId,
           title,
           bodyMd,
-          tags: tags
-            .split(",")
-            .map((tag) => tag.trim())
-            .filter(Boolean),
+          tags,
           status,
         }),
       });
@@ -53,7 +54,7 @@ export default function NewUpdateForm({ projectId, className }: NewUpdateFormPro
 
       setTitle("");
       setBodyMd("");
-      setTags("");
+      setTags([]);
       setStatus("PUBLISHED");
       router.refresh();
     } catch (error) {
@@ -83,26 +84,17 @@ export default function NewUpdateForm({ projectId, className }: NewUpdateFormPro
         />
       </div>
 
-      <div className="grid gap-1">
+      <div className="space-y-2" data-color-mode="light">
         <Label htmlFor="update-body">Body (Markdown)</Label>
-        <Textarea
-          id="update-body"
-          placeholder="Write your update in Markdown"
-          value={bodyMd}
-          onChange={(event) => setBodyMd(event.target.value)}
-          rows={6}
-          required
-        />
+        <div className="overflow-hidden rounded-lg border">
+          <MarkdownEditor value={bodyMd} onChange={(value) => setBodyMd(value ?? "")} height={280} preview="edit" />
+        </div>
       </div>
 
-      <div className="grid gap-1">
-        <Label htmlFor="update-tags">Tags (comma separated)</Label>
-        <Input
-          id="update-tags"
-          placeholder="e.g. release, backend, ui"
-          value={tags}
-          onChange={(event) => setTags(event.target.value)}
-        />
+      <div className="space-y-2">
+        <Label htmlFor="update-tags">Tags</Label>
+        <TagInput value={tags} onChange={setTags} placeholder="Press enter to add a tag" disabled={loading} />
+        <p className="text-xs text-muted-foreground">Example tags: `launch`, `frontend`, `milestone`.</p>
       </div>
 
       <div className="grid gap-1">

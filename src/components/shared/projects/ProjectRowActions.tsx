@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MoreHorizontal } from "lucide-react";
 
 interface ProjectRowActionsProps {
   projectId: string;
@@ -24,6 +26,7 @@ interface ProjectRowActionsProps {
 
 export function ProjectRowActions({ projectId, isArchived }: ProjectRowActionsProps) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const mutate = async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -67,67 +70,104 @@ export function ProjectRowActions({ projectId, isArchived }: ProjectRowActionsPr
     toast.success("Project deleted");
   };
 
-  return (
-    <div className="flex items-center gap-2">
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="outline" size="sm" disabled={isPending}>
-            {isArchived ? "Restore" : "Archive"}
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {isArchived ? "Restore project" : "Archive project"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {isArchived
-                ? "This project will become active again. Collaborators will regain access."
-                : "Archiving hides the project from active views. You can restore it anytime."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isPending}
-              onClick={() => run(archiveOrRestore)}
-            >
-              {isArchived ? "Restore" : "Archive"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+  const handleView = () => {
+    setOpen(false);
+    router.push(`/projects/${projectId}`);
+  };
 
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          aria-label="Open project actions"
+          disabled={isPending}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2" align="end">
+        <div className="flex flex-col gap-1">
           <Button
             variant="ghost"
             size="sm"
-            className="text-destructive hover:text-destructive"
+            className="w-full justify-start"
+            onClick={handleView}
             disabled={isPending}
           >
-            Delete
+            View project
           </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete project permanently</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. All updates, share links, and member access will be removed forever.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => run(deleteProject)}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => setOpen(false)}
+                disabled={isPending}
+              >
+                {isArchived ? "Restore" : "Archive"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {isArchived ? "Restore project" : "Archive project"}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {isArchived
+                    ? "This project will become active again. Collaborators will regain access."
+                    : "Archiving hides the project from active views. You can restore it anytime."}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={isPending}
+                  onClick={() => run(archiveOrRestore)}
+                >
+                  {isArchived ? "Restore" : "Archive"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-destructive hover:text-destructive"
+                onClick={() => setOpen(false)}
+                disabled={isPending}
+              >
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete project permanently</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. All updates, share links, and member access will be removed forever.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={isPending}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => run(deleteProject)}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }

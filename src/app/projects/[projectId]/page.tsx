@@ -1,62 +1,112 @@
-import { projects, updates, shareLinks, members } from "@/lib/actions";
+import { Suspense, type ReactNode } from "react";
+import { redirect } from "next/navigation";
+
+import { AppPageLayout } from "@/components/shared";
+import { projects } from "@/lib/actions";
+
 import {
-  NewUpdateForm,
-  UpdatesList,
-  ShareLinksSection,
-  MembersSection,
-} from "@/components/pages/projects";
+  ProjectSidebarNav,
+  type ProjectSection,
+  ProjectUpdatesSection,
+  ProjectShareLinksSection,
+  ProjectCollaboratorsSection,
+  UpdatesSectionFallback,
+  ShareLinksSectionFallback,
+  CollaboratorsSectionFallback,
+} from "./components";
 
-export default async function ProjectPage({ params }: { params: Promise<{ projectId: string }> }) {
+interface ProjectPageProps {
+  params: Promise<{ projectId: string }>;
+  searchParams: Promise<{ section?: string }>;
+}
+
+const sections: ProjectSection[] = [
+  {
+    value: "updates",
+    label: "Updates",
+    description: "Post and review progress updates",
+  },
+  {
+    value: "share-links",
+    label: "Shareable links",
+    description: "Manage public access links",
+  },
+  {
+    value: "collaborators",
+    label: "Collaborators",
+    description: "Manage project members",
+  },
+];
+
+export default async function ProjectPage({ params, searchParams }: ProjectPageProps) {
   const { projectId } = await params;
+  const { section } = await searchParams;
+  const activeSection = section ?? "updates";
 
-  const [projectRes, updatesRes, linksRes, membersRes] = await Promise.all([
-    projects.getProjectById(projectId),
-    updates.getUpdates(projectId, { page: 1, pageSize: 50 }),
-    shareLinks.getShareLinks(projectId),
-    members.getMembers(projectId),
-  ]);
+  if (!sections.some((item) => item.value === activeSection)) {
+    redirect(`/projects/${projectId}`);
+  }
+
+  const projectRes = await projects.getProjectById(projectId);
 
   if (!projectRes.success) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-10">
-        <div className="text-red-600 text-sm">{projectRes.error.message}</div>
-      </main>
+      <AppPageLayout
+        title="Project"
+        description="We couldn't load this project right now."
+        contentClassName=""
+      >
+        <div className="text-sm text-destructive">{projectRes.error.message}</div>
+      </AppPageLayout>
     );
   }
 
   const project = projectRes.data;
-  const items = updatesRes.success ? updatesRes.data.items : [];
-  const links = linksRes.success ? linksRes.data : [];
-  const memberList = membersRes.success ? membersRes.data : [];
+
+  let sectionContent: ReactNode;
+  let fallback: ReactNode;
+
+  switch (activeSection) {
+    case "share-links":
+      sectionContent = <ProjectShareLinksSection projectId={project.id} />;
+      fallback = <ShareLinksSectionFallback />;
+      break;
+    case "collaborators":
+      sectionContent = <ProjectCollaboratorsSection projectId={project.id} />;
+      fallback = <CollaboratorsSectionFallback />;
+      break;
+    case "updates":
+    default:
+      sectionContent = <ProjectUpdatesSection projectId={project.id} />;
+      fallback = <UpdatesSectionFallback />;
+      break;
+  }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10 space-y-8">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">{project.name}</h1>
-        {project.description && (
-          <p className="text-sm text-muted-foreground">{project.description}</p>
-        )}
-      </header>
+    <AppPageLayout
+      headingSlot={
+        <div className="space-y-4">
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight">{project.name}</h1>
+            {project.description ? (
+              <p className="text-sm text-muted-foreground">{project.description}</p>
+            ) : null}
+          </div>
+        </div>
+      }
+      contentClassName="gap-10"
+    >
+      <div className="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <aside className="lg:self-start">
+          <ProjectSidebarNav projectId={project.id} items={sections} activeValue={activeSection} />
+        </aside>
 
-      <section className="rounded-md border p-4">
-        <h2 className="font-medium mb-3">Post Update</h2>
-        <NewUpdateForm projectId={project.id} />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-medium">Updates</h2>
-        <UpdatesList projectId={project.id} items={items} />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-medium">Share Links</h2>
-        <ShareLinksSection projectId={project.id} links={links} />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-medium">Collaborators</h2>
-        <MembersSection members={memberList} />
-      </section>
-    </main>
+        <div className="space-y-6">
+          <Suspense key={activeSection} fallback={fallback}>
+            {sectionContent}
+          </Suspense>
+        </div>
+      </div>
+    </AppPageLayout>
   );
 }

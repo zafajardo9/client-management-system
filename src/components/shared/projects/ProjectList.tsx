@@ -65,13 +65,16 @@ export function ProjectList({
                   ) : null}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Link
-                    href={`/projects/${project.id}`}
-                    className="text-sm font-medium text-primary hover:underline"
-                  >
-                    View
-                  </Link>
-                  {renderActions ? renderActions(project) : null}
+                  {renderActions ? (
+                    renderActions(project)
+                  ) : (
+                    <Link
+                      href={`/projects/${project.id}`}
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      View
+                    </Link>
+                  )}
                 </div>
               </li>
             ))}

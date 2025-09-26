@@ -6,7 +6,7 @@ export async function getUpdates(
   opts: { status?: "DRAFT" | "PUBLISHED" | "ARCHIVED"; tags?: string[]; page?: number; pageSize?: number } = {}
 ): Promise<
   ActionResult<{
-    items: Array<{ id: string; title: string; createdAt: Date; status: string; tags: string[] }>;
+    items: Array<{ id: string; title: string; bodyMd: string; createdAt: Date; status: string; tags: string[] }>;
     page: number;
     pageSize: number;
     total: number;
@@ -29,7 +29,7 @@ export async function getUpdates(
         orderBy: { createdAt: "desc" },
         take: pageSize,
         skip: (page - 1) * pageSize,
-        select: { id: true, title: true, createdAt: true, status: true, tags: true },
+        select: { id: true, title: true, bodyMd: true, createdAt: true, status: true, tags: true },
       }),
     ]);
 
