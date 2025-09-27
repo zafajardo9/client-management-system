@@ -3,6 +3,8 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
+import { MarkdownEditor, TagInput } from "@/components/shared";
+
 export function UpdateForm({
   update,
   projectId,
@@ -13,7 +15,7 @@ export function UpdateForm({
   const router = useRouter();
   const [title, setTitle] = useState(update.title);
   const [bodyMd, setBodyMd] = useState(update.bodyMd);
-  const [tags, setTags] = useState(update.tags.join(", "));
+  const [tags, setTags] = useState<string[]>(update.tags ?? []);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED" | "ARCHIVED">(
     update.status as "DRAFT" | "PUBLISHED" | "ARCHIVED"
   );
@@ -27,13 +29,14 @@ export function UpdateForm({
     setError(null);
     setSuccess(null);
     try {
+      if (!bodyMd.trim()) {
+        throw new Error("Body cannot be empty.");
+      }
+
       const payload = {
         title,
         bodyMd,
-        tags: tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
+        tags: tags.map((tag) => tag.trim()).filter(Boolean),
         status,
       };
       const res = await fetch(`/api/updates/${update.id}`, {
@@ -83,25 +86,15 @@ export function UpdateForm({
           required
         />
       </div>
-      <div className="grid gap-1">
+      <div className="space-y-2" data-color-mode="light">
         <label className="text-sm font-medium">Body (Markdown)</label>
-        <textarea
-          className="border rounded px-3 py-2"
-          placeholder="Write your update in Markdown"
-          value={bodyMd}
-          onChange={(e) => setBodyMd(e.target.value)}
-          rows={8}
-          required
-        />
+        <div className="overflow-hidden rounded border">
+          <MarkdownEditor value={bodyMd} onChange={(value) => setBodyMd(value ?? "")} height={280} preview="edit" />
+        </div>
       </div>
-      <div className="grid gap-1">
-        <label className="text-sm font-medium">Tags (comma separated)</label>
-        <input
-          className="border rounded px-3 py-2"
-          placeholder="e.g. release, backend, ui"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-        />
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Tags</label>
+        <TagInput value={tags} onChange={setTags} placeholder="Press enter to add a tag" disabled={loading} />
       </div>
       <div className="grid gap-1">
         <label className="text-sm font-medium">Status</label>

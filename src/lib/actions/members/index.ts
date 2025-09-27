@@ -2,3 +2,4 @@ export * from "./addMember";
 export * from "./removeMember";
 export * from "./getMembers";
 export * from "./updateMember";
+export * from "./searchCollaboratorCandidates";

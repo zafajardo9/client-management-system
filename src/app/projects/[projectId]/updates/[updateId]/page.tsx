@@ -5,11 +5,13 @@ import { UpdateForm } from "./components";
 export default async function UpdateDetailPage({
   params,
 }: {
-  params: { projectId: string; updateId: string };
+  params: Promise<{ projectId: string; updateId: string }>;
 }) {
+  const { projectId, updateId } = await params;
+
   const [projectRes, updateRes] = await Promise.all([
-    projects.getProjectById(params.projectId),
-    updates.getUpdateById(params.updateId),
+    projects.getProjectById(projectId),
+    updates.getUpdateById(updateId),
   ]);
 
   if (!projectRes.success) {

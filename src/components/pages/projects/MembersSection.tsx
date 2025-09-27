@@ -1,14 +1,22 @@
-import type { MemberListItem } from "@/lib/actions/members/getMembers";
+import type { GetMembersPayload, MemberListItem } from "@/lib/actions/members/getMembers";
 
 interface MembersSectionProps {
   members: MemberListItem[];
+  viewer?: GetMembersPayload["viewer"];
 }
 
-export function MembersSection({ members }: MembersSectionProps) {
+export function MembersSection({ members, viewer }: MembersSectionProps) {
+  const canManage = viewer?.canManage ?? false;
+
   return (
     <div className="space-y-3 rounded-md border p-4">
       <div className="flex items-center justify-between">
         <h3 className="font-medium">Members</h3>
+        {viewer ? (
+          <span className="text-xs uppercase tracking-wide text-muted-foreground">
+            {viewer.role === "OWNER" ? "Owner" : viewer.role.toLowerCase()}
+          </span>
+        ) : null}
       </div>
       <ul className="divide-y">
         {members.map((member) => (
@@ -24,7 +32,9 @@ export function MembersSection({ members }: MembersSectionProps) {
           <li className="py-6 text-sm text-muted-foreground">No members yet.</li>
         ) : null}
       </ul>
-      {/* TODO: Add AddMemberForm (client component) and remove action with AlertDialog */}
+      {canManage ? (
+        <p className="text-xs text-muted-foreground">Collaboration controls coming soon.</p>
+      ) : null}
     </div>
   );
 }

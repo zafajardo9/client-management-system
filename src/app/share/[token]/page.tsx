@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { shareLinks } from "@/lib/actions";
@@ -8,6 +8,14 @@ import { Badge } from "@/components/ui/badge";
 interface PublicSharePageParams {
   token: string;
 }
+
+const markdownComponents: Components = {
+  ul: ({ node, ...props }) => <ul className="ml-5 list-disc space-y-1" {...props} />,
+  ol: ({ node, ...props }) => <ol className="ml-5 list-decimal space-y-1" {...props} />,
+  li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+  strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+  em: ({ node, ...props }) => <em className="italic" {...props} />,
+};
 
 export default async function PublicSharePage({ params }: { params: Promise<PublicSharePageParams> }) {
   const { token } = await params;
@@ -82,7 +90,9 @@ export default async function PublicSharePage({ params }: { params: Promise<Publ
                 </header>
 
                 <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{update.bodyMd}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                    {update.bodyMd}
+                  </ReactMarkdown>
                 </div>
               </article>
             ))}

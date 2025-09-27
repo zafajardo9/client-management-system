@@ -1,8 +1,12 @@
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
+import type { PrismaClient } from "@prisma/client";
+
 import { db } from "../../db";
 import type { ActionResult } from "../types";
 import { addMemberSchema } from "../../validators";
+
+const prisma = db as PrismaClient;
 
 export async function addMember(
   input: z.infer<typeof addMemberSchema>
@@ -16,18 +20,19 @@ export async function addMember(
       };
     }
 
-    const { projectId, userId, role } = parsed.data;
+    const { projectId, userId, email, role } = parsed.data;
+    const normalizedEmail = email?.trim().toLowerCase();
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return { success: false, error: { code: "UNAUTHORIZED", message: "You must be signed in." } };
     }
 
-    const me = await db.user.findUnique({ where: { clerkUserId } });
+    const me = await prisma.user.findUnique({ where: { clerkUserId } });
     if (!me) {
       return { success: false, error: { code: "USER_NOT_FOUND", message: "User profile not found." } };
     }
 
-    const project = await db.project.findUnique({ where: { id: projectId } });
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
     if (!project) {
       return { success: false, error: { code: "NOT_FOUND", message: "Project not found." } };
     }
@@ -36,25 +41,35 @@ export async function addMember(
       return { success: false, error: { code: "FORBIDDEN", message: "Only the owner can manage members." } };
     }
 
-    const targetUser = await db.user.findUnique({ where: { id: userId } });
+    const targetUser = userId
+      ? await prisma.user.findUnique({ where: { id: userId }, select: { id: true } })
+      : await prisma.user.findUnique({ where: { email: normalizedEmail! }, select: { id: true } });
+
     if (!targetUser) {
       return { success: false, error: { code: "NOT_FOUND", message: "Target user not found." } };
     }
 
-    const existing = await db.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
+    if (targetUser.id === project.ownerId) {
+      return {
+        success: false,
+        error: { code: "INVALID_TARGET", message: "Project owner already has full access." },
+      };
+    }
+
+    const existing = await prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId: targetUser.id } },
     });
 
     let member;
     if (existing) {
-      member = await db.projectMember.update({
-        where: { projectId_userId: { projectId, userId } },
+      member = await prisma.projectMember.update({
+        where: { projectId_userId: { projectId, userId: targetUser.id } },
         data: { role },
         select: { id: true, projectId: true, userId: true, role: true },
       });
     } else {
-      member = await db.projectMember.create({
-        data: { projectId, userId, role },
+      member = await prisma.projectMember.create({
+        data: { projectId, userId: targetUser.id, role },
         select: { id: true, projectId: true, userId: true, role: true },
       });
     }
