@@ -207,7 +207,7 @@ export default function CollaboratorsManager({ projectId }: CollaboratorsManager
                 setQuery(value);
               }}
               onFocus={() => {
-                if (suggestions length > 0) {
+                if (suggestions.length > 0) {
                   setDropdownOpen(true);
                 }
               }}
@@ -234,7 +234,7 @@ export default function CollaboratorsManager({ projectId }: CollaboratorsManager
                   event.preventDefault();
                   setHighlightIndex((prev) => {
                     const next = prev - 1;
-                    return next < 0 ? suggestions length - 1 : next;
+                    return next < 0 ? suggestions.length - 1 : next;
                   });
                 }
 

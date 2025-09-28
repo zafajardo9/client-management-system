@@ -14,7 +14,7 @@ declare module "@uiw/react-md-editor" {
     [key: string]: unknown;
   }
 
-  export interface MDEditor extends React.ForwardRefExoticComponent<MDEditorProps> {}
+  export type MDEditor = React.ForwardRefExoticComponent<MDEditorProps>;
 
   const MDEditor: MDEditor;
   export default MDEditor;

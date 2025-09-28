@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
@@ -28,7 +29,7 @@ export default function UserMenu() {
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" className="flex items-center gap-2 px-2">
           <span className="inline-flex h-8 w-8 overflow-hidden rounded-full bg-muted">
-            <img src={imageUrl} alt={displayName} className="h-full w-full object-cover" />
+            <Image src={imageUrl} alt={displayName} width={32} height={32} className="h-full w-full object-cover" />
           </span>
           <span className="hidden sm:inline text-sm font-medium">{displayName}</span>
         </Button>

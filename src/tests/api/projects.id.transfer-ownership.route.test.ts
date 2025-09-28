@@ -4,10 +4,16 @@ import type { ActionResult } from "@/lib/actions";
 
 type TransferOwnershipResult = ActionResult<{ projectId: string; ownerId: string }>;
 
-const transferOwnership = vi.fn(async (_payload: { projectId: string; targetUserId: string }): Promise<TransferOwnershipResult> => ({
-  success: true,
-  data: { projectId: "proj_1", ownerId: "user_2" },
-}));
+const transferOwnership = vi.fn(
+  async ({ projectId, targetUserId }: { projectId: string; targetUserId: string }): Promise<TransferOwnershipResult> => {
+    void projectId;
+    void targetUserId;
+    return {
+      success: true,
+      data: { projectId: "proj_1", ownerId: "user_2" },
+    };
+  },
+);
 
 vi.mock("@/lib/actions", () => ({
   projects: {

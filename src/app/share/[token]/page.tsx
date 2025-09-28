@@ -10,11 +10,11 @@ interface PublicSharePageParams {
 }
 
 const markdownComponents: Components = {
-  ul: ({ node, ...props }) => <ul className="ml-5 list-disc space-y-1" {...props} />,
-  ol: ({ node, ...props }) => <ol className="ml-5 list-decimal space-y-1" {...props} />,
-  li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
-  strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
-  em: ({ node, ...props }) => <em className="italic" {...props} />,
+  ul: (props) => <ul className="ml-5 list-disc space-y-1" {...props} />,
+  ol: (props) => <ol className="ml-5 list-decimal space-y-1" {...props} />,
+  li: (props) => <li className="leading-relaxed" {...props} />,
+  strong: (props) => <strong className="font-semibold" {...props} />,
+  em: (props) => <em className="italic" {...props} />,
 };
 
 export default async function PublicSharePage({ params }: { params: Promise<PublicSharePageParams> }) {

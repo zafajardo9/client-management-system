@@ -89,3 +89,48 @@ model ShareLink {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model WaitlistEntry {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  fullName      String?
+  company       String?
+  goals         String?
+  source        String?
+  notes         String?
+  metadata      Json?
+  status        WaitlistStatus  @default(PENDING)
+  convertedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  events        WaitlistEvent[]
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model WaitlistEvent {
+  id          String             @id @default(cuid())
+  entryId     String
+  entry       WaitlistEntry      @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  type        WaitlistEventType
+  payload     Json?
+  notes       String?
+  createdAt   DateTime           @default(now())
+
+  @@index([entryId, createdAt])
+}
+
+enum WaitlistStatus {
+  PENDING
+  ENGAGED
+  CONVERTED
+  OPTED_OUT
+}
+
+enum WaitlistEventType {
+  STATUS_CHANGE
+  NOTE
+  COMMUNICATION
+  WEBHOOK
+}
