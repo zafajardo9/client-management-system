@@ -6,12 +6,17 @@
 - Ensure every interactive flow includes responsive states (hover, focus, disabled, loading) using Tailwind state modifiers and shadcn/ui accessible underpinnings.
 - Every surface must support both light and dark themes; gradients, backgrounds, and typography should include `dark:` variants to preserve contrast and mood.
 - Establish a brand-defining gradient motif that persists in both themes. Configure gradient tokens/utilities in `src/app/globals.css` and apply layered backgrounds at the page shell level (e.g., `src/app/page.tsx`), while keeping foreground cards readable via light/dark surface variants.
+- Authenticated app surfaces (dashboard, projects, changelog) should render inside `AppPageLayout` to lock spacing, heading scale, and responsive gutters. Avoid bespoke page wrappers unless a new shell pattern is needed.
+- Use gradients only as atmospheric washes (e.g., subtle top glows or corner fades). Main canvases stay on `bg-background`, while content blocks live on `bg-card` with `border-border/70` outlines and `shadow-sm`/`shadow-xs` depth.
+- Accent color usage should feel deliberate: reserve solid fills for CTAs and success indicators; all other highlights rely on translucent overlays or `Badge` variants driven by shared metadata (e.g., changelog status map).
+- When introducing new components, favor Card-based compositions or bordered panels to maintain the layered, premium aesthetic. Bare sections should be rare and require explicit UX sign-off.
 
 ## Growth & Narrative
 
 - Waitlist signup should feel premium: use `Card` + `Stepper` pattern with subtle gradients and trust markers.
 - Capture goals/use cases in contextual helper text so prospects understand value before submitting.
 - Changelog hub organized by quarters with `Accordion` groupings and inline `Badge` chips for status (Shipped, In Progress, Planned).
+- Changelog page uses the shared `AppPageLayout` shell to match dashboard spacing and typography. Keep gradients restrained to background washes (top glow) while cards remain on `bg-card` surfaces with border accents.
 - Provide filters for changelog (tags, date) using `Tabs` or `SegmentedControl`, and ensure future roadmap entries stand out.
 - Surface CTAs to join waitlist or request demos throughout changelog sections.
 

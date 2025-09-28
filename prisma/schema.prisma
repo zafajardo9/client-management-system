@@ -18,22 +18,28 @@ model User {
   imageUrl     String?
   projects     Project[]        @relation("OwnerProjects")
   memberships  ProjectMember[]
+  clientContacts ClientContact[] @relation("ClientOwner")
+  invitedClientAccesses ClientProjectAccess[] @relation("ClientInviter")
+  authoredComments ProjectComment[] @relation("CommentAuthorUser")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model Project {
-  id           String   @id @default(cuid())
-  ownerId      String
-  owner        User     @relation("OwnerProjects", fields: [ownerId], references: [id])
-  name         String
-  description  String?
-  isArchived   Boolean  @default(false)
-  members      ProjectMember[]
-  updates      Update[]
-  shareLink    ShareLink?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String               @id @default(cuid())
+  ownerId        String
+  owner          User                 @relation("OwnerProjects", fields: [ownerId], references: [id])
+  name           String
+  description    String?
+  isArchived     Boolean              @default(false)
+  members        ProjectMember[]
+  updates        Update[]
+  shareLink      ShareLink?
+  clientAccesses ClientProjectAccess[]
+  clientTags     ClientTag[]
+  comments       ProjectComment[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
 
   @@index([ownerId, createdAt])
   @@index([isArchived])
@@ -69,6 +75,7 @@ model Update {
   createdBy  String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  comments   ProjectComment[]
 
   @@index([projectId, createdAt])
   @@index([status])
@@ -88,6 +95,107 @@ model ShareLink {
   enabled   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ClientContact {
+  id        String   @id @default(cuid())
+  email     String
+  name      String?
+  avatarUrl String?
+  ownerId   String?
+  owner     User?    @relation("ClientOwner", fields: [ownerId], references: [id])
+  access    ClientProjectAccess[]
+  comments  ProjectComment[] @relation("CommentAuthorClient")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([ownerId, email])
+  @@index([email])
+}
+
+model ClientProjectAccess {
+  id           String               @id @default(cuid())
+  projectId    String
+  project      Project              @relation(fields: [projectId], references: [id])
+  clientId     String
+  client       ClientContact        @relation(fields: [clientId], references: [id])
+  invitedById  String
+  invitedBy    User                 @relation("ClientInviter", fields: [invitedById], references: [id])
+  role         ClientRole           @default(CLIENT)
+  status       ClientStatus         @default(PENDING)
+  inviteToken  String?              @unique
+  lastViewedAt DateTime?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  tags         ClientTagAssignment[]
+
+  @@unique([projectId, clientId])
+  @@index([projectId, status])
+}
+
+model ClientTag {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id])
+  label     String
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assignments ClientTagAssignment[]
+
+  @@unique([projectId, label])
+  @@index([projectId])
+}
+
+model ClientTagAssignment {
+  id        String         @id @default(cuid())
+  tagId     String
+  tag       ClientTag      @relation(fields: [tagId], references: [id])
+  accessId  String
+  access    ClientProjectAccess @relation(fields: [accessId], references: [id])
+  createdAt DateTime       @default(now())
+
+  @@unique([tagId, accessId])
+  @@index([accessId])
+}
+
+model ProjectComment {
+  id             String            @id @default(cuid())
+  projectId      String
+  project        Project           @relation(fields: [projectId], references: [id])
+  updateId       String?
+  update         Update?           @relation(fields: [updateId], references: [id])
+  authorUserId   String?
+  authorUser     User?             @relation("CommentAuthorUser", fields: [authorUserId], references: [id])
+  authorClientId String?
+  authorClient   ClientContact?    @relation("CommentAuthorClient", fields: [authorClientId], references: [id])
+  parentId       String?
+  parent         ProjectComment?   @relation("CommentThread", fields: [parentId], references: [id])
+  replies        ProjectComment[]  @relation("CommentThread")
+  authorType     CommentAuthorType
+  body           String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([projectId, createdAt])
+  @@index([updateId])
+}
+
+enum ClientRole {
+  CLIENT
+  INTERNAL
+}
+
+enum ClientStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  REVOKED
+}
+
+enum CommentAuthorType {
+  CREATOR
+  CLIENT
 }
 
 model WaitlistEntry {

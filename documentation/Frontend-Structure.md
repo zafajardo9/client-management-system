@@ -7,6 +7,7 @@ Using Next.js App Router with RSC-first. Components are organized by page under 
 - `/projects/[projectId]` — project overview + updates list
 - `/projects/[projectId]/updates/[updateId]` — update details/edit
 - `/share/[slug]` — public client view for updates
+- `/changelog` — public-facing product changelog sourced from structured content
 
 ## Directory Structure (proposed)
 ```
@@ -48,6 +49,13 @@ src/
         components/
           PublicUpdateList.tsx
         index.ts
+      changelog/
+        components/
+          ChangelogHero.tsx
+          ChangelogQuarterSection.tsx
+          ChangelogEntryCard.tsx
+          ChangelogStatusLegend.tsx
+        index.ts
     shared/
       EmptyState.tsx
       PageHeader.tsx
@@ -82,11 +90,19 @@ src/
 - shadcn/ui components for consistent, accessible UI.
 - Forms: `react-hook-form` + `@hookform/resolvers/zod` for validation.
 - Prefer RSC for data fetching. Use Client Components only for interactive pieces, colocated within `src/components/pages/<route>/components/`.
-- Page-level layouts should apply the brand gradient identity across light and dark themes. Use shared gradient utilities from `src/app/globals.css` and compose background layers in page components (e.g., `src/app/page.tsx`) while keeping content cards theme-aware.
+- Page-level layouts should apply the brand gradient identity across light and dark themes. Use shared gradient utilities from `src/app/globals.css` and compose background layers in page components (e.g., `src/app/page.tsx`). When building authenticated app routes, wrap content with `AppPageLayout` so spacing, typography, and background treatments stay consistent. Keep foreground cards theme-aware.
+
+### Visual Identity Guidelines
+- Use `AppPageLayout` as the primary shell for authenticated views so padding, typography scale, and responsive breakpoints remain uniform across `/dashboard`, `/projects/*`, and `/changelog`.
+- Gradients belong in background washes only (top glow, corner light). Keep the main canvas on `bg-background` and avoid fully gradient-filled sections.
+- Foreground elements should remain on `bg-card` with `border-border/70` (or `/80`) outlines and soft `shadow-sm`/`shadow-xs`. This keeps light/dark parity and mirrors the dashboard aesthetic.
+- Accent color usage: leverage subtle overlays such as `from-primary/10` background blends or status badges via `CHANGELOG_STATUS_META`. Reserve strong fills for key CTAs (`Button` variants) and status indicators.
+- When introducing new sections, prefer stacking content inside Cards or bordered containers before resorting to bare divs; this preserves the layered, premium feel.
 
 ## Shared Atoms (created)
 - `src/components/shared/PageHeader.tsx` — page title/subtitle with optional actions.
 - `src/components/shared/EmptyState.tsx` — empty-state pattern.
+- `src/components/shared/layouts/AppPageLayout.tsx` — normalized shell (padding, heading, actions) for authenticated app views, used by dashboard, projects, and changelog.
 - Barrel: `src/components/shared/index.ts`.
 
 ## Data Fetching
@@ -130,6 +146,8 @@ Mapping to pages/components
   - UpdateForm uses Button/Input/Textarea/Select/Label; AlertDialog for delete.
 - Public share (`src/app/share/[slug]/page.tsx`)
   - Badge for tags; Skeleton for loading.
+- Changelog (`src/app/changelog/page.tsx`)
+  - Structured content via JSON + Zod parsing. Uses `AppPageLayout` with `ChangelogHero`, `ChangelogStatusLegend`, and accordion-driven quarters composed of Cards and Badges.
 
 Notes
 - Keep components tree-shakeable; prefer server-rendered pages and small client footprints.

@@ -1,0 +1,56 @@
+{
+  "quarters": [
+    {
+      "id": "2025-q3",
+      "title": "Q3 2025",
+      "summary": "Phase 2 kickoff focused on growth narratives and client engagement foundations.",
+      "entries": [
+        {
+          "id": "waitlist-launch",
+          "title": "Waitlist funnel launch",
+          "date": "2025-09-12",
+          "status": "shipped",
+          "summary": "Introduced a premium waitlist experience with guided copy, multi-step form, and CRM handoff automation.",
+          "tags": ["growth", "marketing"],
+          "links": [
+            { "label": "Preview", "href": "/waitlist" }
+          ]
+        },
+        {
+          "id": "changelog-hub-wip",
+          "title": "Public changelog hub groundwork",
+          "date": "2025-09-20",
+          "status": "in-progress",
+          "summary": "Scoping content architecture, interaction patterns, and release process for the public changelog hub.",
+          "tags": ["narrative", "roadmap"],
+          "links": []
+        }
+      ]
+    },
+    {
+      "id": "2025-q4",
+      "title": "Q4 2025",
+      "summary": "Collaboration and governance initiatives move into delivery.",
+      "entries": [
+        {
+          "id": "notification-pipeline",
+          "title": "Notification pipeline foundation",
+          "date": "2025-10-05",
+          "status": "planned",
+          "summary": "Queue-backed notification service with reusable email templates and webhook connectors.",
+          "tags": ["notifications", "infrastructure"],
+          "links": []
+        },
+        {
+          "id": "client-tagging",
+          "title": "Client tagging framework",
+          "date": "2025-10-18",
+          "status": "planned",
+          "summary": "Role-aware tagging model to power filters, reporting, and personalized insights.",
+          "tags": ["collaboration", "data"],
+          "links": []
+        }
+      ]
+    }
+  ]
+}
